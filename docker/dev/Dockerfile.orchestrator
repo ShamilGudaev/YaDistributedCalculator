@@ -1,0 +1,16 @@
+FROM golang:1.22.0-alpine AS builder
+
+RUN apk --update add git
+
+WORKDIR /app
+COPY ./backend/go.mod ./backend/go.sum ./
+RUN go mod download
+COPY ./backend .
+
+ENV GOCACHE=/root/.cache/go-build
+
+FROM builder AS orchestrator_build
+RUN --mount=type=cache,target="/root/.cache/go-build" go build -o /out/app/orchestrator cmd/orchestrator/main.go
+
+FROM scratch AS orchestrator                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
+COPY --from=orchestrator_build /out/app/orchestrator /out/app/orchestrator

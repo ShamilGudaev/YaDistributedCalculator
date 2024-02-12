@@ -1,0 +1,19 @@
+FROM node:20-slim AS node-pnpm
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN ["npm", "install", "-g", "pnpm"]
+
+FROM node-pnpm as base
+WORKDIR /app
+COPY ./frontend/pnpm-lock.yaml ./frontend/package.json ./
+
+FROM base AS dependencies
+WORKDIR /app
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+
+FROM base AS dev
+WORKDIR /app
+COPY --from=dependencies /app/node_modules ./node_modules
+COPY ./frontend/ .
+EXPOSE 80
+CMD ["pnpm", "run", "dev", "--host"]

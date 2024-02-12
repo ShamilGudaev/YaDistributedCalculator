@@ -1,0 +1,66 @@
+networks:
+  orchestrator:
+  db:
+services:
+  orchestrator:
+    build:
+      dockerfile: "./docker/dev/Dockerfile.orchestrator"
+      context: "."
+      target: "orchestrator"
+    command: "/out/app/orchestrator"
+    ports:
+      - "1323:1323"
+    networks:
+      - "orchestrator"
+      - "db"
+    secrets:
+      - "db_password"
+    depends_on:
+      - "db"
+    develop:
+      watch:
+        - action: "rebuild"
+          path: "./backend/"
+  agent:
+    build:
+      dockerfile: "./docker/dev/Dockerfile.agent"
+      context: "."
+      target: "agent"
+    command: "/out/app/agent"
+    networks:
+      - "orchestrator"
+    depends_on:
+      - "orchestrator"
+    deploy:
+      replicas: 4
+    develop:
+      watch:
+        - action: "rebuild"
+          path: "./backend/"
+  db:
+    image: "postgres:16.1"
+    environment:
+      POSTGRES_PASSWORD_FILE: "/run/secrets/db_password"
+    ports:
+      - "51941:5432"
+    secrets:
+      - "db_password"
+    networks:
+      - "db"
+  frontend:
+    build:
+      dockerfile: "./docker/dev/Dockerfile.frontend"
+      context: "."
+    command: "pnpm run dev --host 0.0.0.0 --port 5173"
+    ports:
+      - "5173:5173"
+    develop:
+      watch:
+        - action: "rebuild"
+          path: "./frontend/pnpm-lock.yaml"
+        - action: "sync"
+          path: "./frontend/"
+          target: /app
+secrets:
+  db_password:
+    file: ./secrets/db_password.txt

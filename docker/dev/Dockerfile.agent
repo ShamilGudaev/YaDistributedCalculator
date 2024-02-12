@@ -1,0 +1,16 @@
+FROM golang:1.22.0-alpine AS builder
+
+RUN apk --update add git
+
+WORKDIR /app
+COPY ./backend/go.mod ./backend/go.sum ./
+RUN go mod download
+COPY ./backend .
+
+ENV GOCACHE=/root/.cache/go-build
+
+FROM builder AS agent_build
+RUN --mount=type=cache,target="/root/.cache/go-build" go build -o /out/app/agent cmd/agent/main.go
+
+FROM scratch AS agent
+COPY --from=agent_build /out/app/agent /out/app/agent
