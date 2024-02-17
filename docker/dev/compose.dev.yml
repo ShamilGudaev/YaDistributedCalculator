@@ -42,7 +42,7 @@ services:
     environment:
       POSTGRES_PASSWORD_FILE: "/run/secrets/db_password"
     ports:
-      - "51941:5432"
+      - "2069:5432"
     secrets:
       - "db_password"
     networks:
