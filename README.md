@@ -10,4 +10,4 @@
 5) Run from project directory  
 `docker-compose --project-directory ./ --file ./docker/dev/compose.dev.yml up`
 
-The project starts at (http://localhost:5173/)
+The project starts at http://localhost:5173/
