@@ -8,6 +8,10 @@ services:
       context: "."
       target: "orchestrator"
     command: "/out/app/orchestrator"
+    deploy:
+      restart_policy:
+        delay: 5s
+        window: 60s
     ports:
       - "1323:1323"
     networks:
@@ -32,6 +36,9 @@ services:
     depends_on:
       - "orchestrator"
     deploy:
+      restart_policy:
+        delay: 5s
+        window: 60s
       replicas: 4
     develop:
       watch:
@@ -54,6 +61,10 @@ services:
     command: "pnpm run dev --host 0.0.0.0 --port 5173"
     ports:
       - "5173:5173"
+    deploy:
+      restart_policy:
+        delay: 5s
+        window: 60s
     develop:
       watch:
         - action: "rebuild"
