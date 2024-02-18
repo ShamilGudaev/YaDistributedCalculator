@@ -74,7 +74,7 @@ const expressions = computed(() => {
         <FormItem>
           <FormLabel>Expression</FormLabel>
           <FormControl>
-            <Input type="text" placeholder="2 + 1" v-bind="componentField" />
+            <Input type="text" placeholder="2 + 5" v-bind="componentField" />
           </FormControl>
           <FormMessage></FormMessage>
         </FormItem>
