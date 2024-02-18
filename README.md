@@ -11,7 +11,7 @@ git clone https://github.com/ShamilGudaev/YaDistributedCalculator
 ```
 cd YaDistributedCalculator
 ```
-7) Run from project directory
+7) Run
 ```
 docker-compose --project-directory ./ --file ./docker/dev/compose.dev.yml up
 ```
