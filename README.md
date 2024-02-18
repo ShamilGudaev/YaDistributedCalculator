@@ -16,6 +16,10 @@ cd YaDistributedCalculator
 docker-compose --project-directory ./ --file ./docker/dev/compose.dev.yml up
 ```
 
+## Rules for expression:
+1) Supported arithmetic operations `+, -, *, /`
+2) Сompound expressions using parentheses brackets.
+
 The project starts at http://localhost:5173/
 
 [@tosybosy](https://t.me/tosybosy/)
