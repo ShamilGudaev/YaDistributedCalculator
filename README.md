@@ -18,4 +18,4 @@ docker-compose --project-directory ./ --file ./docker/dev/compose.dev.yml up
 
 The project starts at http://localhost:5173/
 
-@tosybosy md [hello](https://t.me/)
+[Contact](https://t.me/@tosybosy/)
