@@ -22,69 +22,6 @@ func (o *Operator) Capture(s []string) error {
 	return nil
 }
 
-type Result interface {
-	GetValue() float64
-}
-
-type Number struct {
-	value float64
-}
-
-func (n *Number) GetValue() float64 {
-	return n.value
-}
-
-type Operation interface {
-	Execute(executed chan bool, stopExecution chan bool)
-}
-
-type ArithmeticOp struct {
-	operator      Operator
-	value         float64
-	left          Result
-	right         Result
-	executionTime time.Duration
-}
-
-func (o *ArithmeticOp) Execute(executed chan bool, stopExecution chan bool) {
-	if o.left == nil || o.right == nil {
-		panic("Already executed")
-	}
-
-	done := make(chan bool, 1)
-	go func() {
-		time.Sleep(o.executionTime)
-		done <- true
-	}()
-
-	select {
-	case <-stopExecution:
-		return
-	case <-done:
-		break
-	}
-
-	switch o.operator {
-	case OpAdd:
-		o.value = o.left.GetValue() + o.right.GetValue()
-	case OpSub:
-		o.value = o.left.GetValue() - o.right.GetValue()
-	case OpMul:
-		o.value = o.left.GetValue() * o.right.GetValue()
-	case OpDiv:
-		o.value = o.left.GetValue() / o.right.GetValue()
-	}
-
-	o.left = nil
-	o.right = nil
-
-	executed <- true
-}
-
-func (o *ArithmeticOp) GetValue() float64 {
-	return o.value
-}
-
 type SumSub struct {
 	Left  MulDiv      `parser:"@@"`
 	Right []*OpSumSub `parser:"@@*"`
@@ -121,7 +58,7 @@ type OpSumSub struct {
 }
 
 type MulDiv struct {
-	Left  Value       `parser:"@@"`
+	Left  SignedValue `parser:"@@"`
 	Right []*OpMulDiv `parser:"@@*"`
 }
 
@@ -145,8 +82,22 @@ func (s *MulDiv) AddToQueue(queue *[]Operation, executionTime map[Operator]time.
 }
 
 type OpMulDiv struct {
-	Operator Operator `parser:"@('*' | '/')"`
-	Right    Value    `parser:"@@"`
+	Operator Operator    `parser:"@('*' | '/')"`
+	Right    SignedValue `parser:"@@"`
+}
+
+type SignedValue struct {
+	Sign  *Operator `parser:"(@('+' | '-'))?"`
+	Value Value     `parser:"@@"`
+}
+
+func (s *SignedValue) AddToQueue(queue *[]Operation, executionTime map[Operator]time.Duration) Result {
+	if s.Sign == nil {
+		v := OpAdd
+		s.Sign = &v
+	}
+
+	return s.Value.AddToQueue(queue, executionTime, *s.Sign)
 }
 
 type Value struct {
@@ -154,20 +105,39 @@ type Value struct {
 	Subexpression *SumSub  `parser:"| '(' @@ ')'"`
 }
 
-func (s *Value) AddToQueue(queue *[]Operation, executionTime map[Operator]time.Duration) Result {
+type Zero struct{}
+
+func (n *Zero) GetValue() float64 {
+	return 0
+}
+
+var zero Zero
+
+func (s *Value) AddToQueue(queue *[]Operation, executionTime map[Operator]time.Duration, sign Operator) Result {
+
 	if s.Number != nil {
+		v := *s.Number
+		if sign == OpSub {
+			v *= -1
+		}
+
 		return &Number{
-			value: *s.Number,
+			value: v,
 		}
 	}
 
-	return s.Subexpression.AddToQueue(queue, executionTime)
-}
+	right := s.Subexpression.AddToQueue(queue, executionTime)
 
-// func (expr *OpSumSub) MakeOperationSequence() ([]Computable, Result) {
-// 	queue := make([]Computable, 0)
-// 	result := expr.AddComputable(&queue)
-// 	return queue, result
-// }
+	o := &ArithmeticOp{
+		value:         0,
+		operator:      OpSub,
+		left:          &zero,
+		right:         right,
+		executionTime: executionTime[OpSub],
+	}
+
+	*queue = append(*queue, o)
+	return o
+}
 
 var Parser = participle.MustBuild[SumSub]()
