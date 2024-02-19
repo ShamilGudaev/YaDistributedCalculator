@@ -1,4 +1,4 @@
-# Distributed Arithmetic Expression Calculator
+ # Distributed Arithmetic Expression Calculator
 
 ## Run project:
 1) Install or update [Docker](https://docs.docker.com/engine/install/)
@@ -28,4 +28,8 @@ The project starts at http://localhost:5173/
 4) The frontend is implemented on Vue.js using the Event Stream principle.
 5) There is no implementation of parallel calculation of a single expression on multiple agents.
 
-[@tosybosy](https://t.me/tosybosy/)
+## How it works:
+The key endpoints of the project are shown in the diagram
+<img src="/docs/scheme.jpg" width="700" height="503" >
+
+Contact [@tosybosy](https://t.me/tosybosy/)
