@@ -30,6 +30,6 @@ The project starts at http://localhost:5173/
 
 ## How it works:
 The key endpoints of the project are shown in the diagram
-![](/docs/scheme.jpg)
+<img src="/docs/scheme.jpg" width="700" height="503" >
 
-[@tosybosy](https://t.me/tosybosy/)
+Contact [@tosybosy](https://t.me/tosybosy/)
