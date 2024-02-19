@@ -28,4 +28,7 @@ The project starts at http://localhost:5173/
 4) The frontend is implemented on Vue.js using the Event Stream principle.
 5) There is no implementation of parallel calculation of a single expression on multiple agents.
 
+## How it works:
+![Alt text]([http://full/path/to/img.jpg](https://raw.githubusercontent.com/ShamilGudaev/YaDistributedCalculator/main/docs/scheme.jpg) "Optional title")
+
 [@tosybosy](https://t.me/tosybosy/)
