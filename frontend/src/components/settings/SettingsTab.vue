@@ -78,7 +78,7 @@ function onCancelClick() {
           <FormControl>
             <Input
               type="number"
-              placeholder="5000"
+              placeholder="1000"
               v-bind="componentField"
               :default-value="data.executionTime.opMulMS"
             />
@@ -92,7 +92,7 @@ function onCancelClick() {
           <FormControl>
             <Input
               type="number"
-              placeholder="5000"
+              placeholder="1000"
               v-bind="componentField"
               :default-value="data.executionTime.opDivMS"
             />
@@ -106,7 +106,7 @@ function onCancelClick() {
           <FormControl>
             <Input
               type="number"
-              placeholder="5000"
+              placeholder="1000"
               v-bind="componentField"
               :default-value="data.executionTime.opAddMS"
             />
@@ -120,7 +120,7 @@ function onCancelClick() {
           <FormControl>
             <Input
               type="number"
-              placeholder="5000"
+              placeholder="1000"
               v-bind="componentField"
               :default-value="data.executionTime.opSubMS"
             />

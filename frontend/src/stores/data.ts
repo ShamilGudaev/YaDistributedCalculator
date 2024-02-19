@@ -21,7 +21,7 @@ const expressionScheme = z.intersection(
       agentId: z.nullable(nanoidScheme)
     }),
     z.object({
-      result: z.number(),
+      result: z.string(),
       agentId: z.null()
     })
   ])

@@ -13,7 +13,7 @@ func SubmitResult(agentID string, expressionID uint64, result float64) bool {
 	reqData, err := json.Marshal(&agent.SubmitResultRequest{
 		ExpressionID: expressionID,
 		AgentID:      agentID,
-		Result:       result,
+		Result:       fmt.Sprintf("%g", result),
 	})
 
 	if err != nil {

@@ -12,9 +12,9 @@ import (
 )
 
 type SubmitResultRequest struct {
-	AgentID      string  `json:"agentId"`
-	ExpressionID uint64  `json:"expressionId,string"`
-	Result       float64 `json:"result"`
+	AgentID      string `json:"agentId"`
+	ExpressionID uint64 `json:"expressionId,string"`
+	Result       string `json:"result"`
 }
 
 type SubmitResultResponse struct {

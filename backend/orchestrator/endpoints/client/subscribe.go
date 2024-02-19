@@ -14,10 +14,10 @@ import (
 )
 
 type ExpressionData struct {
-	ID      uint64   `json:"id,string"`
-	Text    string   `json:"text"`
-	Result  *float64 `json:"result"`
-	AgentID *string  `json:"agentId"`
+	ID      uint64  `json:"id,string"`
+	Text    string  `json:"text"`
+	Result  *string `json:"result"`
+	AgentID *string `json:"agentId"`
 }
 
 type AgentsData struct {

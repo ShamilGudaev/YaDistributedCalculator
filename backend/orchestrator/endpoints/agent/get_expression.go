@@ -56,12 +56,15 @@ func GetExpression(c echo.Context) error {
 
 		if res.RowsAffected == 0 {
 			// Если не нашли, создаем
-			agent := db.Agent{
+			agent = db.Agent{
 				ID:       req.AgentID,
 				LastSeen: time.Now(),
 			}
 
-			res = tx.Create(&agent)
+			res = tx.
+				Clauses(clause.Returning{}).
+				Create(&agent)
+
 			if err := res.Error; err != nil {
 				return err
 			}
@@ -126,10 +129,9 @@ func GetExpression(c echo.Context) error {
 		}
 
 		// Получаем полную информацию об агенте
-		res = db.DB.
+		res = tx.
 			Model(&db.Agent{}).
 			Preload("Expressions").
-			Where("id = ?", agent.ID).
 			First(&agent)
 
 		if err := res.Error; err != nil {

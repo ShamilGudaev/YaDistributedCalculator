@@ -12,9 +12,19 @@ import (
 var limit = 4
 
 func main() {
-	res, err := strconv.Atoi(os.Getenv("WORKERS_LIMIT"))
+	limitEnv := os.Getenv("WORKERS_LIMIT")
 
-	if err == nil && res > 0 {
+	if limitEnv != "" {
+		res, err := strconv.Atoi(limitEnv)
+
+		if err != nil {
+			panic(err)
+		}
+
+		if res <= 0 {
+			panic("WORKERS_LIMIT should be >= 1")
+		}
+
 		limit = res
 	}
 

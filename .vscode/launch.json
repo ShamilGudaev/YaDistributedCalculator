@@ -5,18 +5,25 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Launch Parser",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceRoot}\\backend\\cmd\\parser\\main.go"
+        },
+        {
             "name": "Launch Orhcestrator",
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "${workspaceRoot}\\server\\cmd\\orhcestrator\\orhcestrator.go"
+            "program": "${workspaceRoot}\\backend\\cmd\\orhcestrator\\main.go"
         },
         {
             "name": "Launch Agent",
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "${workspaceRoot}\\server\\cmd\\agent\\agent.go"
+            "program": "${workspaceRoot}\\backend\\cmd\\agent\\main.go"
         }
     ]
 }

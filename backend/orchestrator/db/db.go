@@ -14,7 +14,7 @@ import (
 type Expression struct {
 	ID        uint64 `gorm:"primaryKey"`
 	Text      string `gorm:"not null"`
-	Result    *float64
+	Result    *string
 	AgentID   *string
 	CreatedAt time.Time `gorm:"autoCreateTime"`
 	UpdatedAt time.Time `gorm:"autoUpdateTime"`
@@ -64,9 +64,9 @@ func OpenDB() {
 	DB.Clauses(clause.OnConflict{
 		DoNothing: true,
 	}).Create([]*ExecutionTime{
-		{Operator: parser.OpMul, DurationMS: 5000},
-		{Operator: parser.OpDiv, DurationMS: 5000},
-		{Operator: parser.OpAdd, DurationMS: 5000},
-		{Operator: parser.OpSub, DurationMS: 5000},
+		{Operator: parser.OpMul, DurationMS: 1000},
+		{Operator: parser.OpDiv, DurationMS: 1000},
+		{Operator: parser.OpAdd, DurationMS: 1000},
+		{Operator: parser.OpSub, DurationMS: 1000},
 	})
 }
