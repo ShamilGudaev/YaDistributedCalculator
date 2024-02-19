@@ -29,6 +29,7 @@ The project starts at http://localhost:5173/
 5) There is no implementation of parallel calculation of a single expression on multiple agents.
 
 ## How it works:
-[http://full/path/to/img.jpg](https://raw.githubusercontent.com/ShamilGudaev/YaDistributedCalculator/main/docs/scheme.jpg) "Optional title")
+The key endpoints of the project are shown in the diagram
+![](/docs/scheme.jpg)
 
 [@tosybosy](https://t.me/tosybosy/)
