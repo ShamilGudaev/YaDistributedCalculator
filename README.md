@@ -1,4 +1,4 @@
-# Distributed Arithmetic Expression Calculator
+ # Distributed Arithmetic Expression Calculator
 
 ## Run project:
 1) Install or update [Docker](https://docs.docker.com/engine/install/)
@@ -29,6 +29,6 @@ The project starts at http://localhost:5173/
 5) There is no implementation of parallel calculation of a single expression on multiple agents.
 
 ## How it works:
-![Alt text]([http://full/path/to/img.jpg](https://raw.githubusercontent.com/ShamilGudaev/YaDistributedCalculator/main/docs/scheme.jpg) "Optional title")
+[http://full/path/to/img.jpg](https://raw.githubusercontent.com/ShamilGudaev/YaDistributedCalculator/main/docs/scheme.jpg) "Optional title")
 
 [@tosybosy](https://t.me/tosybosy/)
