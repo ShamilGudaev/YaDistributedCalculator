@@ -11,8 +11,15 @@ import (
 	"gorm.io/gorm/clause"
 )
 
+type User struct {
+	ID           string `gorm:"primaryKey"`
+	Login        string `gorm:"uniqueIndex;not null"`
+	PasswordHash string
+}
+
 type Expression struct {
 	ID        uint64 `gorm:"primaryKey"`
+	UserID    User   `gorm:"constraint:OnDelete:CASCADE;"`
 	Text      string `gorm:"not null"`
 	Result    *string
 	AgentID   *string
