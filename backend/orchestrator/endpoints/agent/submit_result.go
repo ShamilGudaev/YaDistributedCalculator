@@ -4,31 +4,27 @@ import (
 	"backend/orchestrator/db"
 	"backend/orchestrator/endpoints/client"
 	"backend/orchestrator/events"
-	"net/http"
+	"context"
 
-	"github.com/labstack/echo/v4"
+	pb "backend/proto"
+
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
-type SubmitResultRequest struct {
-	AgentID      string `json:"agentId"`
-	ExpressionID uint64 `json:"expressionId,string"`
-	Result       string `json:"result"`
-}
+// type SubmitResultRequest struct {
+// 	AgentID      string `json:"agentId"`
+// 	ExpressionID uint64 `json:"expressionId,string"`
+// 	Result       string `json:"result"`
+// }
 
-type SubmitResultResponse struct {
-	Accepted bool `json:"accepted"`
-}
+// type SubmitResultResponse struct {
+// 	Accepted bool `json:"accepted"`
+// }
 
-func SubmitResult(c echo.Context) error {
-	var req SubmitResultRequest
-	if err := c.Bind(&req); err != nil {
-		c.String(http.StatusBadRequest, "Invalid request body")
-		return nil
-	}
+func (s *AgentGRPCServer) SubmitResult(ctx context.Context, req *pb.SubmitResultRequest) (outRes *pb.SubmitResultResponse, outErr error) {
 
-	err := db.DB.Transaction(func(tx *gorm.DB) error {
+	outErr = db.DB.Transaction(func(tx *gorm.DB) error {
 		var expression db.Expression
 		// Пытаемся найти выражение с нужными id
 		res := tx.
@@ -44,7 +40,8 @@ func SubmitResult(c echo.Context) error {
 
 		if res.RowsAffected == 0 {
 			// Если не нашли, не принимаем
-			return c.JSON(http.StatusOK, &SubmitResultResponse{Accepted: false})
+			outRes = &pb.SubmitResultResponse{Accepted: false}
+			return nil
 		}
 
 		// Если нашли, обновляем
@@ -54,27 +51,20 @@ func SubmitResult(c echo.Context) error {
 			return err
 		}
 
-		c.JSON(http.StatusOK, &SubmitResultResponse{Accepted: true})
+		outRes = &pb.SubmitResultResponse{Accepted: true}
 
-		events.SendEventToClients(
-			"expressions_change",
-			[]client.ExpressionData{
-				{
-					ID:      expression.ID,
-					Text:    expression.Text,
-					AgentID: expression.AgentID,
-					Result:  expression.Result,
-				},
+		events.SendEventToClientByUserID(expression.UserID, "expressions_change", []client.ExpressionData{
+			{
+				ID:      expression.ID,
+				Text:    expression.Text,
+				AgentID: expression.AgentID,
+				Result:  expression.Result,
 			},
+		},
 		)
 
 		return nil
 	})
 
-	if err != nil {
-		c.Logger().Error(err)
-		c.String(http.StatusInternalServerError, "")
-	}
-
-	return nil
+	return
 }

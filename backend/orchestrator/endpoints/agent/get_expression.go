@@ -6,41 +6,36 @@ import (
 	"backend/orchestrator/events"
 	"backend/orchestrator/util"
 	"backend/parser"
+	"context"
 	"fmt"
-	"net/http"
 	"time"
 
-	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+
+	pb "backend/proto"
 )
 
-type GetExpressionRequest struct {
-	AgentID string `json:"agentId"`
-}
+// type GetExpressionRequest struct {
+// 	AgentID string `json:"agentId"`
+// }
 
-type GetExpressionResponse struct {
-	Data      *GetExpressionResponseData `json:"data"`
-	IsDeleted bool                       `json:"isDeleted"`
-}
+// type GetExpressionResponse struct {
+// 	Data      *GetExpressionResponseData `json:"data"`
+// 	IsDeleted bool                       `json:"isDeleted"`
+// }
 
-type GetExpressionResponseData struct {
-	ExpressionID uint64 `json:"expressionId,string"`
-	Expression   string `json:"expression"`
-	OpMulMS      uint32 `json:"opMulMS"`
-	OpDivMS      uint32 `json:"opDivMS"`
-	OpAddMS      uint32 `json:"opAddMS"`
-	OpSubMS      uint32 `json:"opSubMS"`
-}
+// type GetExpressionResponseData struct {
+// 	ExpressionID uint64 `json:"expressionId,string"`
+// 	Expression   string `json:"expression"`
+// 	OpMulMS      uint32 `json:"opMulMS"`
+// 	OpDivMS      uint32 `json:"opDivMS"`
+// 	OpAddMS      uint32 `json:"opAddMS"`
+// 	OpSubMS      uint32 `json:"opSubMS"`
+// }
 
-func GetExpression(c echo.Context) error {
-	var req GetExpressionRequest
-	if err := c.Bind(&req); err != nil {
-		c.String(http.StatusBadRequest, "Invalid request body")
-		return nil
-	}
-
-	err := db.DB.Transaction(func(tx *gorm.DB) error {
+func (s *AgentGRPCServer) GetExpression(ctx context.Context, req *pb.GetExpressionRequest) (outRes *pb.GetExpressionResponse, outErr error) {
+	outErr = db.DB.Transaction(func(tx *gorm.DB) error {
 		var agent db.Agent
 
 		// Пытаемся найти агента в бд
@@ -71,7 +66,8 @@ func GetExpression(c echo.Context) error {
 
 		} else if agent.DeletedAt != nil {
 			// Если агент удален, уведомляем об этом (агент должен сам сменить id)
-			return c.JSON(http.StatusOK, &GetExpressionResponse{IsDeleted: true})
+			outRes = &pb.GetExpressionResponse{IsDeleted: true}
+			return nil
 		}
 
 		// Пытаемся найти выражение без агента
@@ -89,10 +85,11 @@ func GetExpression(c echo.Context) error {
 
 		if res.RowsAffected == 0 {
 			// Если не нашли, уведомляем об этом
-			return c.JSON(http.StatusOK, &GetExpressionResponse{
+			outRes = &pb.GetExpressionResponse{
 				IsDeleted: false,
 				Data:      nil,
-			})
+			}
+			return nil
 		}
 
 		// Нашли, задаем агента для выражения
@@ -103,7 +100,7 @@ func GetExpression(c echo.Context) error {
 			return err
 		}
 
-		var data = &GetExpressionResponseData{
+		var data = &pb.GetExpressionResponse_GetExpressionResponseData{
 			ExpressionID: expression.ID,
 			Expression:   expression.Text,
 		}
@@ -139,19 +136,13 @@ func GetExpression(c echo.Context) error {
 		}
 
 		// Отправляем выражение
-		err := c.JSON(
-			http.StatusOK,
-			&GetExpressionResponse{
-				Data:      data,
-				IsDeleted: false,
-			},
-		)
-
-		if err != nil {
-			return err
+		outRes = &pb.GetExpressionResponse{
+			Data:      data,
+			IsDeleted: false,
 		}
 
-		events.SendEventToClients(
+		events.SendEventToClientByUserID(
+			expression.UserID,
 			"expressions_change",
 			[]client.ExpressionData{
 				{
@@ -181,10 +172,5 @@ func GetExpression(c echo.Context) error {
 		return nil
 	})
 
-	if err != nil {
-		c.Logger().Error(err.Error())
-		c.String(http.StatusInternalServerError, "")
-	}
-
-	return nil
+	return
 }

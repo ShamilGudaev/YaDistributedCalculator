@@ -1,62 +1,36 @@
 package agent
 
 import (
-	"backend/orchestrator/endpoints/agent"
-	"bytes"
-	"encoding/json"
+	pb "backend/proto"
+	"context"
 	"fmt"
-	"net/http"
 	"time"
 )
 
-func SubmitResult(agentID string, expressionID uint64, result float64) bool {
-	reqData, err := json.Marshal(&agent.SubmitResultRequest{
+func SubmitResult(c pb.OrchestratorClient, agentID string, expressionID uint64, result float64) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
+	defer cancel()
+
+	var data = &pb.SubmitResultRequest{
 		ExpressionID: expressionID,
 		AgentID:      agentID,
 		Result:       fmt.Sprintf("%g", result),
-	})
-
-	if err != nil {
-		panic(err)
 	}
 
-	for {
-		cont, result := submitResult2(agentID, reqData)
-		if cont {
+	var err error
+	var res *pb.SubmitResultResponse
+
+	for range 3 {
+		res, err = c.SubmitResult(ctx, data)
+
+		if err != nil {
+			fmt.Printf("%v", err)
+			time.Sleep(time.Second)
 			continue
 		}
 
-		return result
-	}
-}
-
-func submitResult2(agentID string, reqData []byte) (cont bool, result bool) {
-	const path = "submit_result"
-
-	res, err := http.Post(
-		fmt.Sprintf("http://orchestrator:1324/%s", path),
-		"application/json",
-		bytes.NewBuffer(reqData),
-	)
-
-	if printIfHttpReqFailed(err, &agentID, path, 5*time.Second) {
-		return true, false
-	}
-	defer res.Body.Close()
-
-	panicIfBadRequest(res, &agentID, path)
-	if printIfInternalServerError(res, &agentID, path, 5*time.Second) {
-		return true, false
-	}
-	panicIfNotOk(res, &agentID, path)
-
-	var resData agent.SubmitResultResponse
-	if printIfResponseIsInvalid(
-		json.NewDecoder(res.Body).Decode(&resData),
-		&agentID, path, 5*time.Second,
-	) {
-		return true, false
+		return res.Accepted, nil
 	}
 
-	return false, resData.Accepted
+	return false, err
 }

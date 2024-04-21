@@ -15,7 +15,7 @@ cd YaDistributedCalculator
 ```
 docker-compose --project-directory ./ --file ./docker/dev/compose.dev.yml up
 ```
-The project starts at http://localhost:5173/
+The project starts at http://127.0.0.1:5173/
 
 ## Rules for expression:
 1) Supported arithmetic operations `+, -, *, /`
@@ -27,6 +27,9 @@ The project starts at http://localhost:5173/
 3) Added the possibility of monitoring agents, taking into account the number of tasks on each.
 4) The frontend is implemented on Vue.js using the Event Stream principle.
 5) There is no implementation of parallel calculation of a single expression on multiple agents.
+6) User registration and authorization is implemented using JWT.
+7) Communication between the agent and the computing server has been fixed on gRPC.
+8) User data is stored in the database.
 
 ## How it works:
 The key endpoints of the project are shown in the diagram

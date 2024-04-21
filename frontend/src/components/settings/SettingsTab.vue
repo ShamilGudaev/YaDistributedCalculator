@@ -40,10 +40,11 @@ whenever(
 )
 
 const onSubmit = form.handleSubmit(async (values) => {
-  const res = await fetch('http://localhost:1323/apply_execution_time', {
+  const res = await fetch('http://127.0.0.1:1323/apply_execution_time', {
     method: 'POST',
     cache: 'no-cache',
-
+    credentials: 'include',
+    mode: 'cors',
     headers: {
       'Content-Type': 'application/json'
     },
@@ -76,12 +77,8 @@ function onCancelClick() {
         <FormItem>
           <FormLabel>Multiplication</FormLabel>
           <FormControl>
-            <Input
-              type="number"
-              placeholder="5000"
-              v-bind="componentField"
-              :default-value="data.executionTime.opMulMS"
-            />
+            <Input type="number" placeholder="5000" v-bind="componentField"
+              :default-value="data.executionTime.opMulMS" />
           </FormControl>
           <FormMessage></FormMessage>
         </FormItem>
@@ -90,12 +87,8 @@ function onCancelClick() {
         <FormItem>
           <FormLabel>Division</FormLabel>
           <FormControl>
-            <Input
-              type="number"
-              placeholder="5000"
-              v-bind="componentField"
-              :default-value="data.executionTime.opDivMS"
-            />
+            <Input type="number" placeholder="5000" v-bind="componentField"
+              :default-value="data.executionTime.opDivMS" />
           </FormControl>
           <FormMessage></FormMessage>
         </FormItem>
@@ -104,12 +97,8 @@ function onCancelClick() {
         <FormItem>
           <FormLabel>Addition</FormLabel>
           <FormControl>
-            <Input
-              type="number"
-              placeholder="5000"
-              v-bind="componentField"
-              :default-value="data.executionTime.opAddMS"
-            />
+            <Input type="number" placeholder="5000" v-bind="componentField"
+              :default-value="data.executionTime.opAddMS" />
           </FormControl>
           <FormMessage></FormMessage>
         </FormItem>
@@ -118,21 +107,15 @@ function onCancelClick() {
         <FormItem>
           <FormLabel>Subtraction</FormLabel>
           <FormControl>
-            <Input
-              type="number"
-              placeholder="5000"
-              v-bind="componentField"
-              :default-value="data.executionTime.opSubMS"
-            />
+            <Input type="number" placeholder="5000" v-bind="componentField"
+              :default-value="data.executionTime.opSubMS" />
           </FormControl>
           <FormMessage></FormMessage>
         </FormItem>
       </FormField>
       <div class="flex">
         <Button type="submit">Submit</Button>
-        <Button type="button" variant="secondary" class="ml-4" @click="onCancelClick"
-          >Cancel</Button
-        >
+        <Button type="button" variant="secondary" class="ml-4" @click="onCancelClick">Cancel</Button>
       </div>
     </form>
     <div v-else class="flex flex-col">

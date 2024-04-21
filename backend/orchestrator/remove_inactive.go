@@ -118,17 +118,25 @@ func markAsDeleted0(tx *gorm.DB, now time.Time) error {
 		return nil
 	}
 
-	expressionsData := make([]client.ExpressionData, len(expressions))
+	expressionsData := make(map[uint64][]client.ExpressionData, len(expressions))
 
-	for i, agent := range expressions {
-		expressionsData[i] = client.ExpressionData{
-			ID:      agent.ID,
-			Text:    agent.Text,
-			Result:  agent.Result,
-			AgentID: agent.AgentID,
+	for _, expression := range expressions {
+		var userExpressions = expressionsData[expression.UserID]
+		if userExpressions == nil {
+			userExpressions = make([]client.ExpressionData, 0, 1)
 		}
+		userExpressions = append(userExpressions, client.ExpressionData{
+			ID:      expression.ID,
+			Text:    expression.Text,
+			Result:  expression.Result,
+			AgentID: expression.AgentID,
+		})
+		expressionsData[expression.UserID] = userExpressions
 	}
 
-	events.SendEventToClients("expressions_change", expressionsData)
+	for userID, data := range expressionsData {
+		events.SendEventToClientByUserID(userID, "expressions_change", data)
+	}
+
 	return nil
 }

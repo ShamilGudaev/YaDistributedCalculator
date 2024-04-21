@@ -1,53 +1,32 @@
 package agent
 
 import (
-	"backend/orchestrator/endpoints/agent"
-	"bytes"
-	"encoding/json"
+	pb "backend/proto"
+	"context"
 	"fmt"
-	"net/http"
 	"time"
 )
 
-func SendAliveMessage(agentID string) bool {
-	reqData, err := json.Marshal(&agent.IAmAliveRequest{AgentID: agentID})
+func SendAliveMessage(c pb.OrchestratorClient, agentID string) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
+	defer cancel()
 
-	if err != nil {
-		panic(err)
-	}
+	var data = &pb.IAmAliveRequest{AgentID: agentID}
 
-	for {
-		cont, result := sendAliveMessage2(agentID, reqData)
-		if cont {
+	var err error
+	var res *pb.IAmAliveResponse
+
+	for range 3 {
+		res, err = c.IAmAlive(ctx, data)
+
+		if err != nil {
+			fmt.Printf("%v", err)
+			time.Sleep(time.Second)
 			continue
 		}
 
-		return result
+		return !res.IsDeleted, nil
 	}
-}
 
-func sendAliveMessage2(agentID string, reqData []byte) (cont bool, result bool) {
-	const path = "i_am_alive"
-
-	res, err := http.Post(
-		fmt.Sprintf("http://orchestrator:1324/%s", path),
-		"application/json",
-		bytes.NewBuffer(reqData),
-	)
-
-	if printIfHttpReqFailed(err, &agentID, path, 5*time.Second) {
-		return true, false
-	}
-	defer res.Body.Close()
-
-	panicIfBadRequest(res, &agentID, path)
-	if printIfInternalServerError(res, &agentID, path, 5*time.Second) {
-		return true, false
-	}
-	panicIfNotOk(res, &agentID, path)
-
-	var resData agent.IAmAliveResponse
-	json.NewDecoder(res.Body).Decode(&resData)
-
-	return false, !resData.IsDeleted
+	return false, err
 }

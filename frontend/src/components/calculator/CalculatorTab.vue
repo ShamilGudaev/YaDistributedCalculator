@@ -34,10 +34,11 @@ const responseSchema = z.union([
 const form = useForm({ validationSchema: formSchema })
 
 const onSubmit = form.handleSubmit(async (values) => {
-  const res = await fetch('http://localhost:1323/add_expression', {
+  const res = await fetch('http://127.0.0.1:1323/add_expression', {
     method: 'POST',
     cache: 'no-cache',
-
+    credentials: 'include',
+    mode: 'cors',
     headers: {
       'Content-Type': 'application/json'
     },

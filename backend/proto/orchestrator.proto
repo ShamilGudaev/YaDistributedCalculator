@@ -1,0 +1,44 @@
+syntax = "proto3";
+package orchestrator;
+option go_package = "backend/proto";
+
+message GetExpressionRequest{
+    string AgentID = 1;
+}
+
+message GetExpressionResponse{
+    message GetExpressionResponseData{
+        uint64 ExpressionID = 1;
+        string Expression = 2;
+        uint32 OpMulMS = 3;
+        uint32 OpDivMS = 4;
+        uint32 OpAddMS = 5;
+        uint32 OpSubMS = 6;
+    }
+    GetExpressionResponseData Data=1;
+    bool IsDeleted = 2;
+}
+
+message IAmAliveRequest{
+    string AgentID = 1;
+}
+
+message IAmAliveResponse{
+    bool IsDeleted = 1;
+}
+
+message SubmitResultRequest{
+    string AgentID = 1;
+    uint64 ExpressionID = 2;
+    string Result = 3;
+}
+
+message SubmitResultResponse{
+    bool Accepted = 1;
+}
+
+service Orchestrator{
+    rpc GetExpression(GetExpressionRequest) returns (GetExpressionResponse);
+    rpc IAmAlive(IAmAliveRequest) returns (IAmAliveResponse);
+    rpc SubmitResult(SubmitResultRequest) returns (SubmitResultResponse);
+}

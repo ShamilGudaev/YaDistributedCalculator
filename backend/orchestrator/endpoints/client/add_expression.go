@@ -3,6 +3,7 @@ package client
 import (
 	"backend/orchestrator/db"
 	"backend/orchestrator/events"
+	"backend/orchestrator/middleware"
 	"backend/parser"
 	"net/http"
 
@@ -35,8 +36,15 @@ func AddExpression(c echo.Context) error {
 		return nil
 	}
 
+	userID, ok := c.Get(middleware.UserIDKey).(uint64)
+	if !ok {
+		c.String(http.StatusInternalServerError, "Server error")
+		return nil
+	}
+
 	expression := db.Expression{
-		Text: req.Expression,
+		UserID: userID,
+		Text:   req.Expression,
 	}
 
 	result := db.DB.Create(&expression)
@@ -51,7 +59,7 @@ func AddExpression(c echo.Context) error {
 		ExpressionID: &expression.ID,
 	})
 
-	events.SendEventToClients("expressions_change", [1]ExpressionData{{ID: expression.ID, Text: expression.Text}})
+	events.SendEventToClientByUserID(expression.UserID, "expressions_change", []ExpressionData{{ID: expression.ID, Text: expression.Text}})
 
 	return nil
 }

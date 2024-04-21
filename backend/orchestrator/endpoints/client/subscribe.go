@@ -3,6 +3,7 @@ package client
 import (
 	"backend/orchestrator/db"
 	"backend/orchestrator/events"
+	"backend/orchestrator/middleware"
 	"backend/orchestrator/util"
 	"backend/parser"
 	"encoding/json"
@@ -43,8 +44,16 @@ type InitialData struct {
 func Subscribe(c echo.Context) error {
 	e := events.EventsEmitter.On("client")
 	defer events.EventsEmitter.Off("client", e)
+	userID, ok := c.Get(middleware.UserIDKey).(uint64)
+	if !ok {
+		fmt.Fprintf(c.Response(), "Error parse userID")
+	}
 
-	c.Response().Header().Set(echo.HeaderAccessControlAllowOrigin, "http://localhost:5173")
+	clientEventPath := fmt.Sprintf("client/%d", userID)
+	e2 := events.EventsEmitter.On(clientEventPath)
+	defer events.EventsEmitter.Off(clientEventPath, e2)
+
+	c.Response().Header().Set(echo.HeaderAccessControlAllowOrigin, "http://127.0.0.1:5173")
 	c.Response().Header().Set(echo.HeaderContentType, "text/event-stream")
 	c.Response().WriteHeader(http.StatusOK)
 
@@ -56,7 +65,7 @@ func Subscribe(c echo.Context) error {
 		}
 
 		var expressions []db.Expression
-		res := tx.Find(&expressions)
+		res := tx.Find(&expressions, "user_id = ?", userID)
 		if err := res.Error; err != nil {
 			return err
 		}
@@ -134,6 +143,9 @@ func Subscribe(c echo.Context) error {
 		case <-c.Request().Context().Done():
 			return nil
 		case v := <-e:
+			fmt.Fprint(c.Response(), v.String(0))
+			c.Response().Flush()
+		case v := <-e2:
 			fmt.Fprint(c.Response(), v.String(0))
 			c.Response().Flush()
 		}

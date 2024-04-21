@@ -13,12 +13,13 @@ services:
         delay: 5s
         window: 60s
     ports:
-      - "1323:1323"
+      - "127.0.0.1:1323:1323"
     networks:
       - "orchestrator"
       - "db"
     secrets:
       - "db_password"
+      - "jwt_secret"
     depends_on:
       - "db"
     develop:
@@ -49,7 +50,7 @@ services:
     environment:
       POSTGRES_PASSWORD_FILE: "/run/secrets/db_password"
     ports:
-      - "2069:5432"
+      - "127.0.0.1:2069:5432"
     secrets:
       - "db_password"
     networks:
@@ -75,3 +76,5 @@ services:
 secrets:
   db_password:
     file: ./secrets/db_password.txt
+  jwt_secret:
+    file: ./secrets/jwt_secret

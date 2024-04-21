@@ -2,11 +2,17 @@ package main
 
 import (
 	"backend/agent"
+	"log"
 	"os"
 	"strconv"
 	"time"
 
+	pb "backend/proto"
+
 	gonanoid "github.com/matoous/go-nanoid/v2"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/keepalive"
 )
 
 var limit = 4
@@ -43,6 +49,19 @@ func startAgent() {
 
 	defer stopWorkers()
 
+	keepAliveParams := keepalive.ClientParameters{
+		Time:                10 * time.Second,
+		Timeout:             20 * time.Second,
+		PermitWithoutStream: true,
+	}
+
+	conn, err := grpc.Dial("orchestrator:1324", grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithKeepaliveParams(keepAliveParams))
+	if err != nil {
+		log.Fatalf("did not connect: %v", err)
+	}
+	defer conn.Close()
+	c := pb.NewOrchestratorClient(conn)
+
 	aliveInterval := make(chan bool, 1)
 	go agent.LazyInterval(aliveInterval, 5*time.Second)
 
@@ -54,13 +73,15 @@ func startAgent() {
 	for {
 		select {
 		case result := <-resultChannel:
-			if !agent.SubmitResult(agentId, result.ExpressionID, result.Result) {
+			ok, err := agent.SubmitResult(c, agentId, result.ExpressionID, result.Result)
+			if err != nil || !ok {
 				return
 			}
 			delete(workers, result.ExpressionID)
 
 		case <-aliveInterval:
-			if !agent.SendAliveMessage(agentId) {
+			ok, err := agent.SendAliveMessage(c, agentId)
+			if err != nil || !ok {
 				return
 			}
 		case <-requestInterval:
@@ -68,8 +89,8 @@ func startAgent() {
 				continue
 			}
 
-			res := agent.RequestExpression(agentId)
-			if res.IsDeleted {
+			res, err := agent.RequestExpression(c, agentId)
+			if err != nil || res.IsDeleted {
 				return
 			}
 

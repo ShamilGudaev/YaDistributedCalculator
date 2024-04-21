@@ -12,14 +12,15 @@ import (
 )
 
 type User struct {
-	ID           string `gorm:"primaryKey"`
+	ID           uint64 `gorm:"primaryKey"`
 	Login        string `gorm:"uniqueIndex;not null"`
 	PasswordHash string
 }
 
 type Expression struct {
 	ID        uint64 `gorm:"primaryKey"`
-	UserID    User   `gorm:"constraint:OnDelete:CASCADE;"`
+	UserID    uint64
+	User      User   `gorm:"constraint:OnDelete:CASCADE;"`
 	Text      string `gorm:"not null"`
 	Result    *string
 	AgentID   *string
@@ -66,7 +67,7 @@ func OpenDB() {
 		panic(err.Error())
 	}
 
-	DB.AutoMigrate(&Agent{}, &Expression{}, &ExecutionTime{})
+	DB.AutoMigrate(&Agent{}, &User{}, &Expression{}, &ExecutionTime{})
 
 	DB.Clauses(clause.OnConflict{
 		DoNothing: true,

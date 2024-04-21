@@ -1,8 +1,8 @@
 package agent
 
 import (
-	"backend/orchestrator/endpoints/agent"
 	"backend/parser"
+	pb "backend/proto"
 	"time"
 )
 
@@ -16,7 +16,7 @@ type Result struct {
 	Result       float64
 }
 
-func (w Worker) Start(data *agent.GetExpressionResponseData, out chan Result) {
+func (w Worker) Start(data *pb.GetExpressionResponse_GetExpressionResponseData, out chan Result) {
 	p, err := parser.Parser.ParseString("", data.Expression)
 
 	if err != nil {

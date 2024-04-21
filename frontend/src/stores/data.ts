@@ -1,7 +1,8 @@
-import { ref, readonly, watch } from 'vue'
+import { ref, readonly, watch, computed, watchEffect } from 'vue'
 import { defineStore } from 'pinia'
 import * as z from 'zod'
-import { useEventSource, useIntervalFn } from '@vueuse/core'
+import { useEventSource, useFetch, useIntervalFn, whenever } from '@vueuse/core'
+import { useRouter } from 'vue-router'
 
 const nanoidScheme = z.string().regex(/^[A-Za-z0-9_-]{21}$/)
 const uint32Scheme = z.number().int().nonnegative().lte(0xffff_ffff)
@@ -77,20 +78,52 @@ export const useDataStore = defineStore('data', () => {
     time.value = new Date().valueOf()
   })
 
-  const { event, data } = useEventSource('http://localhost:1323/subscribe', [
-    'initial_data',
-    'expressions_change',
-    'agents_change',
-    'exec_time_change',
-    'agents_remove'
-  ])
+  const authorizedFetch = useFetch('http://127.0.0.1:1323/am_i_authorized', {
+    method: 'POST',
+    cache: 'no-cache',
+    credentials: 'include',
+    mode: 'cors'
+  })
+    .post()
+    .json()
+
+  const authorized = computed(() =>
+    authorizedFetch.isFinished.value ? z.boolean().parse(authorizedFetch.data.value) : undefined
+  )
+
+  const router = useRouter()
+
+  whenever(
+    () => authorized.value === false,
+    () => {
+      router.push('/authorization')
+    }
+  )
+
+  watchEffect(() => console.log('Is authorized', authorized.value))
+
+  const url = computed(() =>
+    authorized.value === true ? 'http://127.0.0.1:1323/subscribe' : undefined
+  )
+
+  const { event, data } = useEventSource(
+    url,
+    [
+      'initial_data',
+      'expressions_change',
+      'agents_change', // prettier
+      'exec_time_change',
+      'agents_remove'
+    ],
+    { withCredentials: true }
+  )
 
   watch(
     [event, data],
     ([event, data0]) => {
       if (event == null || data0 == null) return
       const data = JSON.parse(data0)
-      console.log(data)
+      console.log(event, data)
       switch (event) {
         case 'initial_data':
           loadInitialData(intitialDataScheme.parse(data))
