@@ -16,24 +16,6 @@ import (
 	pb "backend/proto"
 )
 
-// type GetExpressionRequest struct {
-// 	AgentID string `json:"agentId"`
-// }
-
-// type GetExpressionResponse struct {
-// 	Data      *GetExpressionResponseData `json:"data"`
-// 	IsDeleted bool                       `json:"isDeleted"`
-// }
-
-// type GetExpressionResponseData struct {
-// 	ExpressionID uint64 `json:"expressionId,string"`
-// 	Expression   string `json:"expression"`
-// 	OpMulMS      uint32 `json:"opMulMS"`
-// 	OpDivMS      uint32 `json:"opDivMS"`
-// 	OpAddMS      uint32 `json:"opAddMS"`
-// 	OpSubMS      uint32 `json:"opSubMS"`
-// }
-
 func (s *AgentGRPCServer) GetExpression(ctx context.Context, req *pb.GetExpressionRequest) (outRes *pb.GetExpressionResponse, outErr error) {
 	outErr = db.DB.Transaction(func(tx *gorm.DB) error {
 		var agent db.Agent

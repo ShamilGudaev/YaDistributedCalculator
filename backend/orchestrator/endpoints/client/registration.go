@@ -40,16 +40,7 @@ func UserRegistration(c echo.Context) error {
 	//Конструируем хеш пароля
 	req.Login = strings.ToLower(req.Login)
 
-	/*saltBytes := make([]byte, 16)
-	_, err := rand.Read(saltBytes)
-	if err != nil {
-		fmt.Println("Error generating salt:", err)
-		return err
-	}
-	saltString := base64.StdEncoding.EncodeToString(saltBytes)
-	passBytes := []byte(fmt.Sprintf("%s%s", req.Password, saltString)) // перегнать в байты*/
-
-	hashedBytes, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost) // байты посоленого пароля сюда, а не байты соли, лол
+	hashedBytes, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}
@@ -107,24 +98,3 @@ func UserRegistration(c echo.Context) error {
 
 	return nil
 }
-
-// json запрос
-// login string
-// password string
-// проверяет, есть ли пользователь
-// если есть, пишет ошибку protobuf { error: string }
-// https://pkg.go.dev/golang.org/x/crypto/argon2
-// если нет, то добавить в бд в хэшем Argon2id 19 MiB, 2 итерации, 1 степень параллельности
-// и отправляем jwt http-only cookie с именем token, куда пишем id пользователя
-// для jwt (HS512) нужно сгенерировать длинную строку (salt), передавать ее через docker secrets
-// добавить secrets в .gitignore
-// из /run/secrets/jwt_salt
-
-// json запрос
-// login string
-// password string
-// проверяет, есть ли пользователь
-// если есть, то отправляем jwt http-only cookie с именем token, куда пишем id пользователя
-// если нет, то пишем ошибку
-
-//golang.org/x/crypto

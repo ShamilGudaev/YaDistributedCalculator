@@ -15,14 +15,6 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-// type IAmAliveRequest struct {
-// 	AgentID string `json:"agentId"`
-// }
-
-// type IAmAliveResponse struct {
-// 	IsDeleted bool `json:"isDeleted"`
-// }
-
 func (s *AgentGRPCServer) IAmAlive(ctx context.Context, req *pb.IAmAliveRequest) (outRes *pb.IAmAliveResponse, outErr error) {
 	outErr = db.DB.Transaction(func(tx *gorm.DB) error {
 		// Пытаемся получить агента

@@ -32,18 +32,6 @@ func SetUserIDMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			func(token *jwt.Token) (interface{}, error) {
 				return cfg.JwtSecret, nil
 			}, jwt.WithValidMethods(validValidationAlgs))
-		/* tokenFromString, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			panic(fmt.Errorf("unexpected signing method: %v", token.Header["alg"]))
-		}
-		}*/
-
-		// if err != nil {
-		// 	if err == jwt.ErrSignatureInvalid {
-		// 		return c.String(http.StatusUnauthorized, "Invalid token signature")
-		// 	}
-		// 	return c.String(http.StatusBadRequest, "Bad request")
-		// }
 
 		if err != nil {
 			return next(c)

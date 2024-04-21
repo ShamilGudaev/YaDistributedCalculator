@@ -12,16 +12,6 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-// type SubmitResultRequest struct {
-// 	AgentID      string `json:"agentId"`
-// 	ExpressionID uint64 `json:"expressionId,string"`
-// 	Result       string `json:"result"`
-// }
-
-// type SubmitResultResponse struct {
-// 	Accepted bool `json:"accepted"`
-// }
-
 func (s *AgentGRPCServer) SubmitResult(ctx context.Context, req *pb.SubmitResultRequest) (outRes *pb.SubmitResultResponse, outErr error) {
 
 	outErr = db.DB.Transaction(func(tx *gorm.DB) error {
